@@ -64,8 +64,12 @@ class Game extends Node {
         this.btnPlayGame.x = 90;
         this.btnPlayGame.y = 150;
         this.btnPlayGame.text = "PLAY GAME";
-        this.btnPlayGame.elm.addEventListener("click", this._init.bind(this));
+        this.btnPlayGame.elm.addEventListener("click", this.playGame.bind(this, this.btnPlayGame));
         this.addChild(this.btnPlayGame);
+    }
+    playGame() {
+        this.btnPlayGame.elm.style.display = "none";
+        this._init();
     }
     _createReplayGameBtn() {
         this.btnReplayGame = new Label();
@@ -176,13 +180,11 @@ class Game extends Node {
         return this.textPopup
     }
     gameLose() {
-        // this.coutCardFlipped = 0;
         const gameLoseText = this.gamePopup();
         gameLoseText.text = "GAME OVER!";
         this._createReplayGameBtn();
     }
     gameWin() {
-        // this.coutCardFlipped = 0;
         const gameWinText = this.gamePopup();
         gameWinText.text = "WIN! YOUR SCORE: " + this.score;
         this._createReplayGameBtn();
