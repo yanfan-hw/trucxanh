@@ -12,7 +12,7 @@ class Game extends Node {
         this.firstCard = null;
         this.secondCard = null;
         this.score = 100;
-        this.coutCardFlipped = 0;
+        this.cardFlipped = 0;
         gameSong.play();
         this._createCards();
         this._createScore();
@@ -43,7 +43,7 @@ class Game extends Node {
     }
     _createScore() {
         this.scoreText = new Label();
-        const STYLE_SCORETEXT = {
+        const SCORE_STYLE = {
             color: 'black',
             fontSize: '30px',
             lineHeight: 2,
@@ -53,7 +53,7 @@ class Game extends Node {
             borderRadius: "10px",
             backgroundColor: "#fff"
         };
-        this.scoreText.style = STYLE_SCORETEXT;
+        this.scoreText.style = SCORE_STYLE;
         this.scoreText.y = 420;
         this.scoreText.text = "Score: " + this.score;
 
@@ -98,7 +98,7 @@ class Game extends Node {
     plusScore(bonusScore) {
         this.animationScore(this.score, this.score + bonusScore);
         this.score = this.score + bonusScore;
-        if (this.coutCardFlipped === 10) this.gameWin();
+        if (this.cardFlipped === 10) this.gameWin();
     }
     minusScore(penaltyScore) {
         this.animationScore(this.score, this.score - penaltyScore);
@@ -145,7 +145,7 @@ class Game extends Node {
         this.canClick = false;
         if (this.firstCard.value === this.secondCard.value) {
             matched.play();
-            this.coutCardFlipped += 1;
+            this.cardFlipped += 1;
             this.plusScore(10);
             setTimeout(() => {
                 this.firstCard.hide();
@@ -171,14 +171,13 @@ class Game extends Node {
     resetGame() {
         const cards = document.body.getElementsByTagName("div")[0];
         cards.innerHTML = "";
-        // this.score = 10;
         this._init();
     }
     gamePopup() {
         const cards = document.body.getElementsByTagName("div")[0];
         cards.innerHTML = "";
         this.textPopup = new Label();
-        const TEXTPOPUP_STYLE = {
+        const POPUP_STYLE = {
             color: 'red',
             width: '100%',
             textAlign: 'center',
@@ -186,12 +185,11 @@ class Game extends Node {
             fontWeight: 'bold',
             backgroundColor: '#fff'
         }
-        this.textPopup.style = TEXTPOPUP_STYLE;
+        this.textPopup.style = POPUP_STYLE;
         this.addChild(this.textPopup);
         return this.textPopup
     }
     gameLose() {
-        // this.coutCardFlipped = 0;
         lose.play()
         const gameLoseText = this.gamePopup();
         gameLoseText.text = "GAME OVER!";
@@ -199,7 +197,6 @@ class Game extends Node {
     }
     gameWin() {
         win.play()
-        // this.coutCardFlipped = 0;
         const gameWinText = this.gamePopup();
         gameWinText.text = "WIN! YOUR SCORE: " + this.score;
         this._createReplayGameBtn();
