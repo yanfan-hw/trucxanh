@@ -17,8 +17,8 @@ export class Sprite extends Node {
         elm.style.position = "absolute";
         elm.style.width = "100%";
         elm.style.height = "100%";
-        elm.style.transform = "rotateY(180deg)";
-        elm.style.backfaceVisibility = "hidden";
+        // elm.style.transform = "rotateY(180deg)";
+        // elm.style.backfaceVisibility = "hidden";
         return elm;
     }
 }
