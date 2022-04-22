@@ -3,7 +3,7 @@ import { Sprite } from "../core/Sprite.js";
 import { Label } from "../core/Label.js";
 const BASE_URL =
     "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white";
-const ballPokemon = 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Pok%C3%A9_Ball_icon.svg/512px-Pok%C3%A9_Ball_icon.png'
+const ballPokemon = 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Pok%C3%A9_Ball_icon.svg/512px-Pok%C3%A9_Ball_icon.png';
 export class Card extends Node {
     constructor(index) {
         super();
@@ -70,7 +70,7 @@ export class Card extends Node {
     }
     hide() {
         const tl = gsap.timeline();
-        tl.to(this.elm, { zIndex: 1, scale: 1.5, duration: 0.3, delay: 1});
+        tl.to(this.elm, { zIndex: 1, scale: 1.5, duration: 0.3, delay: 0.5});
         tl.to(this.elm, { zIndex: 1, scale: 0, duration: 0.3});
     }
 }

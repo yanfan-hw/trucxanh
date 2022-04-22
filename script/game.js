@@ -22,8 +22,6 @@ class Game extends Node {
         for (let index = 0; index < 20; index++) {
             let card = new Card(index);
             const CARD_STYLE = {
-                // transition: 'transform 0.5s ease-in-out 0s',
-                // transformStyle: 'preserve-3d',
                 backgroundColor: 'rgb(38, 160, 218)',
                 borderRadius: '5px',
                 border: '2px solid rgb(255, 255, 255)'
@@ -31,8 +29,6 @@ class Game extends Node {
             Object.assign(card.elm.style, CARD_STYLE);
             card.width = 100;
             card.height = 100;
-            // let row = index % 5;
-            // let col = Math.floor(index / 5);
             card.x = (505 - 100) / 2;
             card.y = (400 - 100) / 2;
             card.elm.addEventListener("click", this.onClickCard.bind(this, card));
@@ -66,7 +62,6 @@ class Game extends Node {
                 ease: Back.easeOut.config(6),
                 x: row * 110,
                 y: col * 110,
-                // delay: i * 0.1
             })
         };
     }
@@ -127,12 +122,20 @@ class Game extends Node {
     plusScore(bonusScore) {
         this.animationScore(this.score, this.score + bonusScore);
         this.score = this.score + bonusScore;
-        if (this.cardFlipped === 10) this.gameWin();
+        if (this.cardFlipped === 10) {
+            setTimeout(() => {
+                this.gameWin();
+            }, 1000)
+        };
     }
     minusScore(penaltyScore) {
         this.animationScore(this.score, this.score - penaltyScore);
         this.score = this.score - penaltyScore;
-        if (this.score === 0) this.gameLose();
+        if (this.score === 0) {
+            setTimeout(() => {
+                this.gameLose();
+            }, 1000)
+        };
     }
 
     shuffleCards(array) {
@@ -166,7 +169,9 @@ class Game extends Node {
             this.secondCard = card;
             // * Open secondCard
             this.secondCard.open();
+            cardOpen.play();
             console.log("secondCard", card.value);
+
             // * CompareCard
             this.compareCard();
         }
@@ -174,20 +179,24 @@ class Game extends Node {
     compareCard() {
         this.canClick = false;
         if (this.firstCard.value === this.secondCard.value) {
-            matched.play();
             this.cardFlipped += 1;
             this.plusScore(10);
             setTimeout(() => {
                 this.firstCard.hide();
                 this.secondCard.hide();
+                setTimeout(() => {
+                    matched.play();
+                }, 500);
                 console.log(true, "Hide");
             }, 500)
         } else {
-            matchFail.play();
             this.minusScore(10);
             setTimeout(() => {
                 this.firstCard.close();
                 this.secondCard.close();
+                setTimeout(() => {
+                    matchFail.play();
+                }, 500)
                 console.log(false, "Close");
             }, 500)
         }
@@ -230,32 +239,32 @@ class Game extends Node {
         const gameWinText = this.gamePopup();
         gameWinText.text = "WIN! YOUR SCORE: " + this.score;
         this._createReplayGameBtn();
-        // let master = gsap.timeline();
-        // master.add(this.control());
+        this.animationWin();
     }
-    control() {
-        // let bg = game.elm.getElementsByTagName("div");
-        const dots = gsap.timeline(),
-            qty = 80,
-            duration = 2.5,
-            colors = ["#91e600", "#84d100", "#73b403", "#528003"];
-
-        for (let i = 0; i < qty; i++) {
-            const dot = new Node();
-            dot.elm.style.position = "absolute";
-            dot.elm.style.backgroundColor = "#91e600";
-            dot.elm.style.width = "50px";
-            dot.elm.style.height = "50px";
-            dot.elm.style.borderRadius = "50%";
-            this.addChild(dot);
-            console.log(dot);
-            // dot.appendTo(bg)[0];
-            const color = colors[(Math.random() * colors.length) | 0];
-            gsap.set(dot.elm.style, { backgroundColor: color, x: 300, y: 700 });
-            const delay = Math.random() * duration;
-            dots.to(dot, { duration: duration, physics2D: { velocity: Math.random() * 400 + 150, angle: Math.random() * 40 + 250, gravity: 500 } }, delay);
-        }
-        return dots;
+    animationWin() {
+        var total = 70, container = game, w = game._width, h = game.height;
+        for (let i = 0; i < total; i++) {
+            let div = document.createElement('div');
+            div.className = 'dot';
+            container.elm.appendChild(div);
+            TweenMax.set(div, {
+                x: R(0, w),
+                y: R(-100, 100),
+                opacity: 1, scale: R(0, 0.5) + 0.5,
+                // backgroundImage: "url(https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Pok%C3%A9_Ball_icon.svg/512px-Pok%C3%A9_Ball_icon.png)",
+                // backgroundSize: '100px 100px',
+                // backgroundPosition: 'center',
+                // backgroundRepeat: 'no-repeat',
+                backgroundColor: "hsl(" + R(170, 360) + ",50%,50%)"
+            });
+            animation(div);
+        };
+        function animation(elm) {
+            TweenMax.to(elm, R(0, 5) + 3, { y: h, ease: Linear.easeNone, repeat: -1, delay: -5 });
+            TweenMax.to(elm, R(0, 5) + 1, { x: '+=70', repeat: -1, yoyo: true, ease: Sine.easeInOut })
+            TweenMax.to(elm, R(0, 1) + 0.5, { opacity: 0, repeat: -1, yoyo: true, ease: Sine.easeInOut })
+        };
+        function R(min, max) { return min + (Math.random() * (max - min)) };
     }
 }
 
@@ -272,6 +281,4 @@ let win = new Audio("./sounds/you-win.mp3");
 let matchFail = new Audio("./sounds/match-fail.mp3");
 let matched = new Audio("./sounds/matched-song.mp3");
 let cardOpen = new Audio("./sounds/menu-open.mp3");
-// let bg = game.elm.getElementsByTagName("div");
-// let master = gsap.timeline();
-//     master.add(game.control());
+// game.animationWin();
