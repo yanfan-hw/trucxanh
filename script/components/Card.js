@@ -15,7 +15,8 @@ export class Card extends Node {
     }
     _createSprite() {
         this.sprite = new Sprite();
-        this.sprite.elm.style.display = "none";
+        // this.sprite.elm.style.display = "none";
+        this.sprite.elm.style.background = "rgb(38, 160, 218)";
         this.sprite.width = 100;
         this.sprite.height = 100;
         this.addChild(this.sprite);
@@ -24,6 +25,8 @@ export class Card extends Node {
         let cover = new Node();
         cover.width = 100;
         cover.height = 100;
+        cover.elm.style.background = "rgb(38, 160, 218)";
+        cover.elm.style.opacity = 0;
         cover.elm.style.cursor = "pointer";
         this.cover = cover;
         this.addChild(this.cover);
@@ -41,7 +44,7 @@ export class Card extends Node {
         };
         label.style = LABEL_STYLE;
         this.label = label;
-        this.addChild(this.label);
+        this.cover.addChild(this.label);
     }
     setValue(value) {
         this.value = value;
@@ -51,8 +54,7 @@ export class Card extends Node {
         const tl = gsap.timeline();
         tl.to(this.elm, { scaleX: 0, duration: 0.3 });
         tl.call(() => {
-            this.sprite.elm.style.display = "unset";
-            this.label.elm.style.display = "none";
+            this.cover.opacity = 0;
         })
         tl.to(this.elm, { scaleX: 1, duration: 0.3 });
     }
@@ -63,14 +65,13 @@ export class Card extends Node {
         tl.to(this.elm, 0.1, { x: "+=20", yoyo: true, repeat: 2 })
         tl.to(this.elm, { scaleX: 0, duration: 0.3 });
         tl.call(() => {
-            this.sprite.elm.style.display = "none";
-            this.label.elm.style.display = "unset";
+            this.cover.opacity = 1;
         });
         tl.to(this.elm, { scaleX: 1, duration: 0.3 });
     }
     hide() {
         const tl = gsap.timeline();
-        tl.to(this.elm, { zIndex: 1, scale: 1.5, duration: 0.3, delay: 0.5});
-        tl.to(this.elm, { zIndex: 1, scale: 0, duration: 0.3});
+        tl.to(this.elm, { scale: 1.5, duration: 0.3, delay: 0.5});
+        tl.to(this.elm, { scale: 0, duration: 0.3});
     }
 }

@@ -13,7 +13,7 @@ class Game extends Node {
         this.secondCard = null;
         this.score = 100;
         this.cardFlipped = 0;
-        gameSong.play();
+        gameSound.play();
         this._createCards();
         this._createScore();
     }
@@ -22,9 +22,9 @@ class Game extends Node {
         for (let index = 0; index < 20; index++) {
             let card = new Card(index);
             const CARD_STYLE = {
-                backgroundColor: 'rgb(38, 160, 218)',
                 borderRadius: '5px',
-                border: '2px solid rgb(255, 255, 255)'
+                border: '2px solid rgb(255, 255, 255)',
+                opacity: 0
             };
             Object.assign(card.elm.style, CARD_STYLE);
             card.width = 100;
@@ -32,38 +32,53 @@ class Game extends Node {
             card.x = (505 - 100) / 2;
             card.y = (400 - 100) / 2;
             card.elm.addEventListener("click", this.onClickCard.bind(this, card));
-            this.addChild(card);
             this.cards.push(card);
         }
-        // console.log(this.cards);
-        // const tl = gsap.timeline();
-        // for (let i = 19; i >= 0; i++) {
-        //     tl.fromTo(this.cards[i], 0.2, { alpha: 0 }, { ease: Back.easeOut.config(6), alpha: 1});
-        //     if (i == 0) {
-        //         tl.fromTo(this.cards[i], 1, { alpha: 0 }, {
-        //             ease: Back.easeOut.config(6),
-        //             alpha: 1,
-        //             onComplete: this.move()
-        //         });
-        //     }
-        // }
-        // tl.delay = 1;
+        this.shuffleCards(this.cards);
 
-        // tl.play();
-        this.move();
-        this.shuffleCards(this.cards)
     }
-    move() {
-        const tl = gsap.timeline();
+    _fadeOutCards() {
+        this.canClick = false;
+        for (let i = 19; i >= 0; i--) {
+            this.addChild(this.cards[i]);
+            TweenMax.fromTo(this.cards[i], 0.2, { opacity: 0 },
+                {
+                    ease: Back.easeOut.config(6),
+                    opacity: 1,
+                    delay: (20 - i) * 0.1
+                });
+            TweenMax.fromTo(this.cards[i].cover, 2, { opacity: 0 },
+                {
+                    ease: Back.easeOut.config(6),
+                    opacity: 1,
+                    delay: (20 - i) * 0.1
+                });
+            if (i == 0) {
+                TweenMax.fromTo(this.cards[i].cover, 1, { opacity: 0 }, {
+                    ease: Back.easeOut.config(6),
+                    opacity: 1,
+                    delay: (20 - i) * 0.1,
+                    onComplete: () => {
+                        this._animationMoveCards();
+                    }
+                });
+            }
+        }
+    }
+    _animationMoveCards() {
         for (let i = 0; i < 20; i++) {
             let row = i % 5;
             let col = Math.floor(i / 5);
-            tl.to(this.cards[i], 0.3, {
+            TweenMax.to(this.cards[i], 0.5, {
                 ease: Back.easeOut.config(6),
                 x: row * 110,
                 y: col * 110,
+                delay: i * 0.1
             })
         };
+        setTimeout(() => {
+            this.canClick = true;
+        }, 3000);
     }
     _createScore() {
         this.scoreText = new Label();
@@ -125,7 +140,7 @@ class Game extends Node {
         if (this.cardFlipped === 10) {
             setTimeout(() => {
                 this.gameWin();
-            }, 1000)
+            }, 1500)
         };
     }
     minusScore(penaltyScore) {
@@ -148,31 +163,28 @@ class Game extends Node {
         //     return Math.random() - 0.5;
         // });
         array.forEach((element, index) => {
-            const value = randomArr[index] + 1;
+            const value = randomArr[index];
             console.log(element.index + 1, value)
             element.setValue(value);
         });
+        this._fadeOutCards();
     }
 
     onClickCard(card) {
-        if (this.cardFlipped == 0) { gameSong.pause() }
+        gameSound.pause();
         if (!this.canClick) return;
         if (card === this.firstCard) return;
         if (this.firstCard === null) {
-            cardOpen.play();
+            cardOpenSound.play();
             this.firstCard = card;
-            // * Open firstCard
             this.firstCard.open()
             console.log("firstCard", card.value);
         } else {
             this.canClick = false;
             this.secondCard = card;
-            // * Open secondCard
             this.secondCard.open();
-            cardOpen.play();
+            cardOpenSound.play();
             console.log("secondCard", card.value);
-
-            // * CompareCard
             this.compareCard();
         }
     }
@@ -185,7 +197,7 @@ class Game extends Node {
                 this.firstCard.hide();
                 this.secondCard.hide();
                 setTimeout(() => {
-                    matched.play();
+                    matchedSound.play();
                 }, 500);
                 console.log(true, "Hide");
             }, 500)
@@ -195,7 +207,7 @@ class Game extends Node {
                 this.firstCard.close();
                 this.secondCard.close();
                 setTimeout(() => {
-                    matchFail.play();
+                    matchFailSound.play();
                 }, 500)
                 console.log(false, "Close");
             }, 500)
@@ -207,14 +219,17 @@ class Game extends Node {
             console.log("reset var")
         }, 2000)
     }
+    _removeCards() {
+        this.children.forEach((element, index) => {
+            element.elm.remove()
+        });
+    }
     resetGame() {
-        const cards = document.body.getElementsByTagName("div")[0];
-        cards.innerHTML = "";
+        this,this._removeCards();
         this._init();
     }
     gamePopup() {
-        const cards = document.body.getElementsByTagName("div")[0];
-        cards.innerHTML = "";
+        this._removeCards();
         this.textPopup = new Label();
         const POPUP_STYLE = {
             color: 'red',
@@ -229,13 +244,13 @@ class Game extends Node {
         return this.textPopup
     }
     gameLose() {
-        lose.play()
+        gameOverSound.play()
         const gameLoseText = this.gamePopup();
         gameLoseText.text = "GAME OVER!";
         this._createReplayGameBtn();
     }
     gameWin() {
-        win.play();
+        gameWinSound.play();
         const gameWinText = this.gamePopup();
         gameWinText.text = "WIN! YOUR SCORE: " + this.score;
         this._createReplayGameBtn();
@@ -244,13 +259,14 @@ class Game extends Node {
     animationWin() {
         var total = 70, container = game, w = game._width, h = game.height;
         for (let i = 0; i < total; i++) {
-            let div = document.createElement('div');
-            div.className = 'dot';
-            container.elm.appendChild(div);
-            TweenMax.set(div, {
+            let div = new Node();
+            div.elm.className = 'dot';
+            container.addChild(div);
+            TweenMax.set(div.elm, {
                 x: R(0, w),
                 y: R(-100, 100),
-                opacity: 1, scale: R(0, 0.5) + 0.5,
+                opacity: 1,
+                scale: R(0, 0.5) + 0.5,
                 // backgroundImage: "url(https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Pok%C3%A9_Ball_icon.svg/512px-Pok%C3%A9_Ball_icon.png)",
                 // backgroundSize: '100px 100px',
                 // backgroundPosition: 'center',
@@ -275,10 +291,9 @@ game.elm.style.position = "relative";
 game.elm.style.margin = "auto";
 document.body.appendChild(game.elm);
 
-let gameSong = new Audio("./sounds/game-song.mp3");
-let lose = new Audio("./sounds/gamers-fail-game.mp3");
-let win = new Audio("./sounds/you-win.mp3");
-let matchFail = new Audio("./sounds/match-fail.mp3");
-let matched = new Audio("./sounds/matched-song.mp3");
-let cardOpen = new Audio("./sounds/menu-open.mp3");
-// game.animationWin();
+let gameSound = new Audio("./sounds/game-song.mp3");
+let gameOverSound = new Audio("./sounds/gamers-fail-game.mp3");
+let gameWinSound = new Audio("./sounds/you-win.mp3");
+let matchFailSound = new Audio("./sounds/match-fail.mp3");
+let matchedSound = new Audio("./sounds/matched-song.mp3");
+let cardOpenSound = new Audio("./sounds/menu-open.mp3");

@@ -8,6 +8,7 @@ export class Node { // entity
         this._display = null;
         this.elm = this._createElement();
         this.children = [];
+        this._opacity = 0;
     }
 
     get display() {
@@ -15,6 +16,13 @@ export class Node { // entity
     }
     set display(value) {
         this.elm.style.display = value;
+    }
+    get opacity() {
+        return this._opacity;
+    }
+    set opacity(value){
+        this._opacity = value;
+        this.elm.style.opacity = this._opacity;
     }
 
     get x() {
